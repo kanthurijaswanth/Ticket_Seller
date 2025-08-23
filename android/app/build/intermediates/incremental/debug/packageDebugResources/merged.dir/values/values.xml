@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="gcm_defaultSenderId" translatable="false">577642351914</string>
+    <string name="google_api_key" translatable="false">AIzaSyAH9okQzFnQ6qjWv9p8d-seFdVSQGxKwvw</string>
+    <string name="google_app_id" translatable="false">1:577642351914:android:89e2aa8a66b2fdc6156253</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyAH9okQzFnQ6qjWv9p8d-seFdVSQGxKwvw</string>
+    <string name="google_storage_bucket" translatable="false">ticketseller-6b865.firebasestorage.app</string>
+    <string name="project_id" translatable="false">ticketseller-6b865</string>
+    <style name="Theme.TicketSeller" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+    </style>
+</resources>
