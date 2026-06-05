@@ -1,8 +1,2 @@
-// app/src/main/java/com/ticketseller/app/App.kt
+// Legacy placeholder. Real Application class is TicketSellerApp.kt
 package com.ticketseller.app
-
-import android.app.Application
-import dagger.hilt.android.HiltAndroidApp
-
-@HiltAndroidApp
-class App : Application()

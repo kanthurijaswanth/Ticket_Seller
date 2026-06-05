@@ -1,0 +1,11 @@
+<resources>
+    <color name="brand_yellow">#FACC15</color>
+    <color name="brand_yellow_dark">#B45309</color>
+    <color name="brand_yellow_light">#FEF3C7</color>
+    <color name="ink">#1B1B1F</color>
+    <color name="ink_muted">#5F6066</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_alt">#FFFBEA</color>
+    <color name="success">#1B8A3A</color>
+    <color name="warning">#C77700</color>
+</resources>

@@ -1,6 +1,8 @@
 <resources>
     <style name="Theme.TicketSeller" parent="Theme.Material3.DayNight.NoActionBar">
-        <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@android:color/black</item>
+        <item name="android:statusBarColor">@color/brand_yellow</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <!-- Yellow status bar is bright → use DARK system icons. -->
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>
