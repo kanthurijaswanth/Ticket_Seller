@@ -84,6 +84,7 @@ class ChatViewModel @Inject constructor(
             val phone = runCatching { userRepository.get(uid)?.phone }.getOrNull().orEmpty()
             if (phone.isBlank()) _toast.value = "Add your phone number in Profile so it can be shared."
             runCatching {
+                chatRepository.openThread(t) // ensure the row exists so the consent flag persists
                 chatRepository.consentReveal(threadId, asBuyer, phone)
                 chatRepository.send(
                     threadId, uid,

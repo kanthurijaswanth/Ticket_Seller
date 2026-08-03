@@ -14,6 +14,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -118,12 +120,13 @@ class ChatRepository @Inject constructor(
     suspend fun consentReveal(threadId: String, asBuyer: Boolean, myPhone: String) {
         val consentField = if (asBuyer) "buyer_consent_reveal" else "seller_consent_reveal"
         val phoneField = if (asBuyer) "buyer_phone" else "seller_phone"
+        // Explicit JSON so the boolean serialises correctly and the flag actually persists.
         supabase.from("chat_threads").update(
-            mapOf(
-                consentField to true,
-                phoneField to myPhone,
-                "updated_at" to System.currentTimeMillis(),
-            )
+            buildJsonObject {
+                put(consentField, true)
+                put(phoneField, myPhone)
+                put("updated_at", System.currentTimeMillis())
+            }
         ) { filter { eq("id", threadId) } }
     }
 }

@@ -13,6 +13,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,7 +47,9 @@ fun MainShell(
     onNotifications: () -> Unit,
     onSignOut: () -> Unit,
 ) {
-    var tab by remember { mutableStateOf(Tab.Home) }
+    // Saveable so the selected tab survives navigating to a sub-screen and back.
+    var tabIndex by rememberSaveable { mutableStateOf(0) }
+    val tab = Tab.entries[tabIndex]
     var showTheme by remember { mutableStateOf(false) }
 
     if (showTheme) ColoursThemeSheet(onDismiss = { showTheme = false })
@@ -54,7 +57,7 @@ fun MainShell(
     AppBackground {
         Box(Modifier.fillMaxSize().statusBarsPadding()) {
             when (tab) {
-                Tab.Home -> HomePane(onListing = onListing, onSell = onSell, onNotifications = onNotifications, onOpenProfile = { tab = Tab.Profile })
+                Tab.Home -> HomePane(onListing = onListing, onSell = onSell, onNotifications = onNotifications, onOpenProfile = { tabIndex = Tab.Profile.ordinal })
                 Tab.Tickets -> MyTicketsPane(onListing = onListing, onOrder = onOrder)
                 Tab.Chats -> ChatListPane(onChat = onChat)
                 Tab.Profile -> ProfilePane(onEditProfile = onEditProfile, onSignOut = onSignOut, onOpenTheme = { showTheme = true })
@@ -62,7 +65,7 @@ fun MainShell(
 
             BottomNavBar(
                 selected = tab,
-                onSelect = { tab = it },
+                onSelect = { tabIndex = it.ordinal },
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
