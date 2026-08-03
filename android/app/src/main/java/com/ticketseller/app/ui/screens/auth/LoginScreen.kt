@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ticketseller.app.ui.common.AppBackground
 import com.ticketseller.app.ui.common.GradientButton
+import com.ticketseller.app.ui.common.glassBox
 import com.ticketseller.app.ui.theme.LocalGlass
 
 @Composable
@@ -172,7 +173,7 @@ private fun GlassField(
 ) {
     val g = LocalGlass.current
     Column(
-        Modifier.fillMaxWidth().clip(RoundedCornerShape(19.dp)).background(g.glass).border(1.dp, g.glassBorder, RoundedCornerShape(19.dp)).padding(horizontal = 16.dp, vertical = 12.dp),
+        Modifier.fillMaxWidth().glassBox(RoundedCornerShape(19.dp)).padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Text(label, style = MaterialTheme.typography.labelSmall, color = g.ink3)
         Spacer(Modifier.height(6.dp))

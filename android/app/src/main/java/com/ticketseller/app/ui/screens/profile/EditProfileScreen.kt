@@ -28,6 +28,7 @@ import com.ticketseller.app.data.repo.UserRepository
 import com.ticketseller.app.ui.common.AppBackground
 import com.ticketseller.app.ui.common.GlassIconButton
 import com.ticketseller.app.ui.common.GradientButton
+import com.ticketseller.app.ui.common.glassBox
 import com.ticketseller.app.ui.theme.LocalGlass
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -136,7 +137,7 @@ fun EditProfileScreen(
 @Composable
 private fun Field(label: String, value: String, onValue: (String) -> Unit, placeholder: String, keyboard: KeyboardType = KeyboardType.Text) {
     val g = LocalGlass.current
-    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(19.dp)).background(g.glass).border(1.dp, g.glassBorder, RoundedCornerShape(19.dp)).padding(horizontal = 16.dp, vertical = 12.dp)) {
+    Column(Modifier.fillMaxWidth().glassBox(RoundedCornerShape(19.dp)).padding(horizontal = 16.dp, vertical = 12.dp)) {
         Text(label, style = MaterialTheme.typography.labelSmall, color = g.ink3)
         Spacer(Modifier.height(6.dp))
         Box {

@@ -79,7 +79,7 @@ fun MyTicketsPane(
         contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 14.dp, bottom = 120.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
-        item { Text("My tickets", style = MaterialTheme.typography.headlineSmall, color = g.ink, fontWeight = FontWeight.ExtraBold) }
+        item { Text("Your tickets", style = MaterialTheme.typography.headlineSmall, color = g.ink, fontWeight = FontWeight.ExtraBold) }
         item {
             Row(
                 Modifier.clip(RoundedCornerShape(18.dp)).background(g.glass).border(1.dp, g.glassBorder, RoundedCornerShape(18.dp)).padding(5.dp),

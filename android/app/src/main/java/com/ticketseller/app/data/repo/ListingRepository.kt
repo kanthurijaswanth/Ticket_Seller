@@ -4,6 +4,7 @@ import com.ticketseller.app.data.model.Listing
 import com.ticketseller.app.data.model.ListingStatus
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.realtime.PostgresAction
 import io.github.jan.supabase.realtime.channel
 import io.github.jan.supabase.realtime.postgresChangeFlow
@@ -22,6 +23,13 @@ class ListingRepository @Inject constructor(
     private val supabase: SupabaseClient,
 ) {
     private val table = "listings"
+
+    // Everything except the heavy base64 image — used for list screens so they load fast.
+    private val listColumns = Columns.list(
+        "id", "seller_id", "seller_name", "seller_rating", "ticket", "address",
+        "asking_price", "ticket_image_hash", "verification_notes", "verification_flags",
+        "status", "created_at", "updated_at",
+    )
 
     suspend fun create(listing: Listing): String {
         val id = listing.id.ifBlank { UUID.randomUUID().toString() }
@@ -61,7 +69,7 @@ class ListingRepository @Inject constructor(
     }
 
     private suspend fun fetchActive(): List<Listing> = runCatching {
-        supabase.from(table).select {
+        supabase.from(table).select(listColumns) {
             filter { eq("status", ListingStatus.ACTIVE.name) }
             limit(100)
         }.decodeList<Listing>().sortedBy { it.ticket.journeyDateMillis }
@@ -80,7 +88,7 @@ class ListingRepository @Inject constructor(
     }
 
     private suspend fun fetchBySeller(sellerId: String): List<Listing> = runCatching {
-        supabase.from(table).select {
+        supabase.from(table).select(listColumns) {
             filter { eq("seller_id", sellerId) }
         }.decodeList<Listing>().sortedByDescending { it.createdAt }
     }.getOrDefault(emptyList())

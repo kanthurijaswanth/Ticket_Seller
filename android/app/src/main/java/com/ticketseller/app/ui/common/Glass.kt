@@ -79,6 +79,17 @@ fun GlassCard(
     Column(m, content = content)
 }
 
+/** Border + soft depth shadow + glass fill — for input fields and small boxes. */
+@Composable
+fun Modifier.glassBox(shape: Shape = RoundedCornerShape(16.dp), strong: Boolean = false): Modifier {
+    val g = LocalGlass.current
+    return this
+        .shadow(6.dp, shape, ambientColor = g.shadow, spotColor = g.shadow)
+        .clip(shape)
+        .background(if (strong) g.glassStrong else g.glass)
+        .border(1.dp, g.glassBorder, shape)
+}
+
 /** Brand→deep gradient primary action button. */
 @Composable
 fun GradientButton(

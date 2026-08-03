@@ -1,7 +1,6 @@
 package com.ticketseller.app.ui.screens.main
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,8 +16,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.ticketseller.app.ui.common.AppBackground
 import com.ticketseller.app.ui.screens.chat.ChatListPane
@@ -30,7 +31,7 @@ import com.ticketseller.app.ui.theme.LocalGlass
 
 private enum class Tab(val label: String, val icon: ImageVector) {
     Home("Home", Icons.Filled.Home),
-    Tickets("Tickets", Icons.Filled.ConfirmationNumber),
+    Tickets("Your Tickets", Icons.Filled.ConfirmationNumber),
     Chats("Chats", Icons.AutoMirrored.Filled.Chat),
     Profile("You", Icons.Filled.Person),
 }
@@ -53,52 +54,54 @@ fun MainShell(
     AppBackground {
         Box(Modifier.fillMaxSize().statusBarsPadding()) {
             when (tab) {
-                Tab.Home -> HomePane(onListing = onListing, onSell = onSell, onNotifications = onNotifications)
+                Tab.Home -> HomePane(onListing = onListing, onSell = onSell, onNotifications = onNotifications, onOpenProfile = { tab = Tab.Profile })
                 Tab.Tickets -> MyTicketsPane(onListing = onListing, onOrder = onOrder)
                 Tab.Chats -> ChatListPane(onChat = onChat)
                 Tab.Profile -> ProfilePane(onEditProfile = onEditProfile, onSignOut = onSignOut, onOpenTheme = { showTheme = true })
             }
 
-            GlassBottomBar(
+            BottomNavBar(
                 selected = tab,
                 onSelect = { tab = it },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
     }
 }
 
 @Composable
-private fun GlassBottomBar(selected: Tab, onSelect: (Tab) -> Unit, modifier: Modifier = Modifier) {
+private fun BottomNavBar(selected: Tab, onSelect: (Tab) -> Unit, modifier: Modifier = Modifier) {
     val g = LocalGlass.current
-    val shape = RoundedCornerShape(26.dp)
-    Row(
+    val shape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)
+    // Full-width bar flush to the bottom edge — opaque, so nothing behind it can be tapped.
+    Column(
         modifier
             .fillMaxWidth()
+            .shadow(14.dp, shape, clip = false)
             .clip(shape)
-            .background(g.bg1)          // opaque base — content doesn't show through
-            .background(g.glass)        // subtle theme tint on top
-            .border(1.dp, g.glassBorder, shape)
-            .padding(horizontal = 10.dp, vertical = 9.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+            .background(g.bg1)
+            .background(g.glass)
+            .navigationBarsPadding(),
     ) {
-        Tab.entries.forEach { t ->
-            val active = t == selected
-            Column(
-                Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(18.dp))
-                    .background(if (active) g.tint else Color.Transparent)
-                    .clickable { onSelect(t) }
-                    .padding(vertical = 9.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(5.dp),
-            ) {
-                Icon(t.icon, t.label, tint = if (active) g.tintInk else g.ink3, modifier = Modifier.size(21.dp))
-                Text(t.label, style = MaterialTheme.typography.labelSmall, color = if (active) g.tintInk else g.ink3)
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+        ) {
+            Tab.entries.forEach { t ->
+                val active = t == selected
+                Column(
+                    Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(if (active) g.tint else Color.Transparent)
+                        .clickable { onSelect(t) }
+                        .padding(vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    Icon(t.icon, t.label, tint = if (active) g.tintInk else g.ink3, modifier = Modifier.size(20.dp))
+                    Text(t.label, style = MaterialTheme.typography.labelSmall, color = if (active) g.tintInk else g.ink3, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                }
             }
         }
     }

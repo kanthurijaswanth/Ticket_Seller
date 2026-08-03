@@ -102,9 +102,18 @@ class SellViewModel @Inject constructor(
         if (u.imageBase64.isBlank()) { _ui.value = u.copy(error = "Please upload a clear ticket photo."); return }
         if (priceMinor <= 0) { _ui.value = u.copy(error = "Enter an asking price."); return }
         if (u.ticket.source.isBlank() || u.ticket.destination.isBlank()) {
-            _ui.value = u.copy(error = "Enter source and destination."); return
+            _ui.value = u.copy(error = "Enter both the source and destination cities."); return
         }
-        if (u.ticket.journeyDateMillis == 0L) { _ui.value = u.copy(error = "Enter journey date."); return }
+        if (u.ticket.journeyDateMillis == 0L) { _ui.value = u.copy(error = "Pick the journey date and time."); return }
+        if (u.ticket.pnrOrBookingId.isBlank()) {
+            _ui.value = u.copy(error = "Add the PNR / booking ID from the ticket so buyers can verify it."); return
+        }
+        if (u.ticket.passengerName.isBlank()) {
+            _ui.value = u.copy(error = "Add the passenger name exactly as printed on the ticket."); return
+        }
+        if (u.ticket.operator.isBlank()) {
+            _ui.value = u.copy(error = "Add the operator / train name."); return
+        }
 
         viewModelScope.launch {
             _ui.value = _ui.value.copy(submitting = true, error = null)

@@ -38,6 +38,7 @@ import com.ticketseller.app.data.repo.UserRepository
 import com.ticketseller.app.ui.common.AppBackground
 import com.ticketseller.app.ui.common.GlassIconButton
 import com.ticketseller.app.ui.common.LoadingBox
+import com.ticketseller.app.ui.common.glassBox
 import com.ticketseller.app.ui.theme.LocalGlass
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
@@ -140,7 +141,7 @@ fun ChatScreen(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 Box(
-                    Modifier.weight(1f).clip(RoundedCornerShape(22.dp)).background(g.glassStrong).border(1.dp, g.glassBorder, RoundedCornerShape(22.dp)).padding(horizontal = 16.dp, vertical = 13.dp),
+                    Modifier.weight(1f).glassBox(RoundedCornerShape(22.dp), strong = true).padding(horizontal = 16.dp, vertical = 13.dp),
                 ) {
                     if (draft.isEmpty()) Text("Type a message…", style = MaterialTheme.typography.bodyLarge, color = g.ink3)
                     BasicTextField(

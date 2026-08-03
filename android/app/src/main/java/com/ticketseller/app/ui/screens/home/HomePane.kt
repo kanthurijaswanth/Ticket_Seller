@@ -38,6 +38,7 @@ import com.ticketseller.app.data.repo.ListingRepository
 import com.ticketseller.app.data.repo.UserRepository
 import com.ticketseller.app.ui.common.GlassCard
 import com.ticketseller.app.ui.common.TintChip
+import com.ticketseller.app.ui.common.glassBox
 import com.ticketseller.app.ui.theme.LocalGlass
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -77,6 +78,7 @@ fun HomePane(
     onListing: (String) -> Unit,
     onSell: () -> Unit,
     onNotifications: () -> Unit = {},
+    onOpenProfile: () -> Unit = {},
 ) {
     val g = LocalGlass.current
     val all by vm.listings.collectAsState()
@@ -100,22 +102,27 @@ fun HomePane(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
-            // Greeting row
+            // Greeting row — tap the avatar/name to open your profile
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    Modifier.size(44.dp).clip(RoundedCornerShape(15.dp))
-                        .background(Brush.linearGradient(listOf(g.brand, g.deep))),
-                    contentAlignment = Alignment.Center,
+                Row(
+                    Modifier.weight(1f).clip(RoundedCornerShape(16.dp)).clickable { onOpenProfile() }.padding(4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
-                        name.firstOrNull()?.uppercase() ?: "🙂",
-                        style = MaterialTheme.typography.titleMedium, color = g.onBrandStrong, fontWeight = FontWeight.ExtraBold,
-                    )
-                }
-                Spacer(Modifier.width(12.dp))
-                Column(Modifier.weight(1f)) {
-                    Text("Namaste", style = MaterialTheme.typography.bodySmall, color = g.ink3)
-                    Text(name.ifBlank { "Traveller" }, style = MaterialTheme.typography.titleLarge, color = g.ink, fontWeight = FontWeight.ExtraBold)
+                    Box(
+                        Modifier.size(44.dp).clip(RoundedCornerShape(15.dp))
+                            .background(Brush.linearGradient(listOf(g.brand, g.deep))),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            name.firstOrNull()?.uppercase() ?: "🙂",
+                            style = MaterialTheme.typography.titleMedium, color = g.onBrandStrong, fontWeight = FontWeight.ExtraBold,
+                        )
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text("Namaste", style = MaterialTheme.typography.bodySmall, color = g.ink3)
+                        Text(name.ifBlank { "Traveller" }, style = MaterialTheme.typography.titleLarge, color = g.ink, fontWeight = FontWeight.ExtraBold)
+                    }
                 }
                 com.ticketseller.app.ui.common.GlassIconButton(
                     icon = Icons.Filled.Notifications,
@@ -128,8 +135,7 @@ fun HomePane(
         item {
             // Search
             Row(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(20.dp)).background(g.glass)
-                    .border(1.dp, g.glassBorder, RoundedCornerShape(20.dp)).padding(horizontal = 16.dp, vertical = 14.dp),
+                Modifier.fillMaxWidth().glassBox(RoundedCornerShape(20.dp)).padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(Icons.Outlined.Search, null, tint = g.ink3, modifier = Modifier.size(19.dp))

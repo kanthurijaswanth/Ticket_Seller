@@ -74,6 +74,7 @@ class PaymentViewModel @Inject constructor(
     private val _seller = MutableStateFlow<User?>(null)
     val seller: StateFlow<User?> = _seller
     private val _listing = MutableStateFlow<Listing?>(null)
+    val listing: StateFlow<Listing?> = _listing
     private val _busy = MutableStateFlow(false)
     val busy: StateFlow<Boolean> = _busy
 
@@ -118,6 +119,7 @@ fun PaymentScreen(
     val g = LocalGlass.current
     val order by vm.order.collectAsState()
     val seller by vm.seller.collectAsState()
+    val listing by vm.listing.collectAsState()
     val busy by vm.busy.collectAsState()
     val ctx = LocalContext.current
 
@@ -151,6 +153,16 @@ fun PaymentScreen(
                 paid -> PaidState(o)
                 cancelled -> Centered(Icons.Filled.Info, "Order cancelled", g.ink3)
                 else -> {
+                    // Ticket summary
+                    listing?.let { l ->
+                        GlassCard {
+                            Column(Modifier.padding(16.dp)) {
+                                Text("${l.ticket.source} → ${l.ticket.destination}", style = MaterialTheme.typography.titleMedium, color = g.ink, fontWeight = FontWeight.ExtraBold)
+                                Text(l.ticket.operator.ifBlank { if (l.ticket.type.name == "BUS") "Bus ticket" else "Train ticket" }, style = MaterialTheme.typography.labelMedium, color = g.ink3)
+                            }
+                        }
+                        Spacer(Modifier.height(12.dp))
+                    }
                     // Amount
                     GlassCard(strong = true) {
                         Column(Modifier.fillMaxWidth().padding(22.dp), horizontalAlignment = Alignment.CenterHorizontally) {

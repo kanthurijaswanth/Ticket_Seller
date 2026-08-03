@@ -38,7 +38,7 @@ private class ThemeDef(
     val bgDark1: Long, val bgDark2: Long,
 )
 
-val THEME_KEYS = listOf("sunshine", "mint", "indigo", "rose", "ocean", "graphite")
+val THEME_KEYS = listOf("sunshine", "mint", "indigo", "rose", "ocean", "graphite", "classic", "monochrome")
 
 private val THEMES = mapOf(
     "sunshine" to ThemeDef("Sunshine", "Your brand yellow + burnt amber",
@@ -59,6 +59,12 @@ private val THEMES = mapOf(
     "graphite" to ThemeDef("Graphite", "Neutral, zero colour noise",
         0xCBD5E1, 0xE2E8F0, 0x334155, 0x1E293B, 203, 213, 225, 51, 65, 85,
         0x1E293B, 0xFFFFFF, 0x15181E, 0xFBFBFC, 0xF0F1F3, 0x334155, 0x14171C, 0x0A0C0F),
+    "classic" to ThemeDef("Classic", "Royal blue + navy",
+        0x2563EB, 0x60A5FA, 0x1E3A8A, 0x172554, 37, 99, 235, 30, 58, 138,
+        0xFFFFFF, 0xFFFFFF, 0x101828, 0xFBFCFF, 0xEEF2FB, 0x1E40AF, 0x0D1526, 0x070B14),
+    "monochrome" to ThemeDef("Monochrome", "Black, white & grey",
+        0x27272A, 0x52525B, 0x18181B, 0x09090B, 39, 39, 42, 24, 24, 27,
+        0xFFFFFF, 0xFFFFFF, 0x18181B, 0xFFFFFF, 0xF4F4F5, 0x3F3F46, 0x101012, 0x060607),
 )
 
 private fun solid(hex: Long) = Color(0xFF000000 or hex)
@@ -74,9 +80,9 @@ private fun buildGlass(d: ThemeDef, dark: Boolean): GlassTokens = if (!dark) Gla
     accent = solid(d.deep), onDeep = Color.White,
     bg1 = solid(d.bgLight1), bg2 = solid(d.bgLight2),
     blobA = rgba(d.br, d.bg, d.bb, 0.55f), blobB = rgba(d.dr, d.dg, d.db, 0.26f),
-    glass = white(0.62f), glassStrong = white(0.82f), glassBorder = white(0.92f), sheet = white(0.94f),
+    glass = white(0.62f), glassStrong = white(0.82f), glassBorder = ink(0.14f), sheet = white(0.94f),
     ink = solid(d.inkLight), ink2 = ink(0.66f), ink3 = ink(0.46f), onInk = Color.White,
-    hair = ink(0.12f), shadow = ink(0.09f), dot = Color.White,
+    hair = ink(0.12f), shadow = ink(0.16f), dot = Color.White,
     tint = rgba(d.br, d.bg, d.bb, 0.24f), tintInk = solid(d.tintInkLight),
     dark = false,
 ) else GlassTokens(
@@ -86,9 +92,9 @@ private fun buildGlass(d: ThemeDef, dark: Boolean): GlassTokens = if (!dark) Gla
     accent = solid(d.brandLight), onDeep = Color.White,
     bg1 = solid(d.bgDark1), bg2 = solid(d.bgDark2),
     blobA = rgba(d.br, d.bg, d.bb, 0.28f), blobB = rgba(d.dr, d.dg, d.db, 0.42f),
-    glass = white(0.08f), glassStrong = white(0.13f), glassBorder = white(0.16f), sheet = Color(28, 30, 36, 230),
+    glass = white(0.08f), glassStrong = white(0.13f), glassBorder = white(0.22f), sheet = Color(28, 30, 36, 230),
     ink = Color(0xFFF4F5F7), ink2 = white(0.70f), ink3 = white(0.46f), onInk = Color(0xFF14161B),
-    hair = white(0.14f), shadow = black(0.45f), dot = Color(0xFF14161B),
+    hair = white(0.14f), shadow = black(0.55f), dot = Color(0xFF14161B),
     tint = rgba(d.br, d.bg, d.bb, 0.18f), tintInk = solid(d.brandLight),
     dark = true,
 )
