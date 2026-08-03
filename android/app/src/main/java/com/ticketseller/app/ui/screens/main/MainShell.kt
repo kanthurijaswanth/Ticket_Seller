@@ -21,9 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.ticketseller.app.ui.common.AppBackground
-import com.ticketseller.app.ui.common.LocalHazeState
 import com.ticketseller.app.ui.screens.chat.ChatListPane
-import dev.chrisbanes.haze.hazeChild
 import com.ticketseller.app.ui.screens.home.HomePane
 import com.ticketseller.app.ui.screens.orders.MyTicketsPane
 import com.ticketseller.app.ui.screens.profile.ColoursThemeSheet
@@ -81,7 +79,8 @@ private fun GlassBottomBar(selected: Tab, onSelect: (Tab) -> Unit, modifier: Mod
         modifier
             .fillMaxWidth()
             .clip(shape)
-            .hazeChild(LocalHazeState.current, shape)
+            .background(g.bg1)          // opaque base — content doesn't show through
+            .background(g.glass)        // subtle theme tint on top
             .border(1.dp, g.glassBorder, shape)
             .padding(horizontal = 10.dp, vertical = 9.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),

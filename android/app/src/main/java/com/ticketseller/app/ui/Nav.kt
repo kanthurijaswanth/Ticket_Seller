@@ -20,8 +20,10 @@ import com.ticketseller.app.ui.screens.orders.OrderDetailScreen
 import com.ticketseller.app.ui.screens.orders.PaymentScreen
 import com.ticketseller.app.ui.screens.profile.EditProfileScreen
 import com.ticketseller.app.ui.screens.sell.SellScreen
+import com.ticketseller.app.ui.screens.splash.SplashScreen
 
 object Routes {
+    const val Splash = "splash"
     const val Login = "login"
     const val Signup = "signup"
     const val Main = "main"
@@ -45,9 +47,13 @@ fun AppNav() {
     val authVm: AuthViewModel = hiltViewModel()
     val signedIn by authVm.isSignedIn.collectAsState()
 
-    val start = if (signedIn) Routes.Main else Routes.Login
-
-    NavHost(navController = nav, startDestination = start) {
+    NavHost(navController = nav, startDestination = Routes.Splash) {
+        composable(Routes.Splash) {
+            SplashScreen(onDone = {
+                val dest = if (authVm.isSignedIn.value) Routes.Main else Routes.Login
+                nav.navigate(dest) { popUpTo(Routes.Splash) { inclusive = true } }
+            })
+        }
         composable(Routes.Login) {
             LoginScreen(
                 onSignedIn = { nav.navigate(Routes.Main) { popUpTo(Routes.Login) { inclusive = true } } },

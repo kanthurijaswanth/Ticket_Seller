@@ -1,0 +1,26 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- soft shadow under the ticket -->
+    <path
+        android:fillColor="#22000000"
+        android:pathData="M32,41 L76,41 A4,4 0 0 1 80,45 L80,53 A6,6 0 0 0 80,63 L80,69 A4,4 0 0 1 76,73 L32,73 A4,4 0 0 1 28,69 L28,63 A6,6 0 0 0 28,53 L28,45 A4,4 0 0 1 32,41 Z" />
+    <!-- white ticket body with side notches -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M32,38 L76,38 A4,4 0 0 1 80,42 L80,50 A6,6 0 0 0 80,60 L80,66 A4,4 0 0 1 76,70 L32,70 A4,4 0 0 1 28,66 L28,60 A6,6 0 0 0 28,50 L28,42 A4,4 0 0 1 32,38 Z" />
+    <!-- perforation dashes -->
+    <path
+        android:fillColor="#D9C48A"
+        android:pathData="M41,43 h3 v4 h-3 z M41,49 h3 v4 h-3 z M41,55 h3 v4 h-3 z M41,61 h3 v4 h-3 z" />
+    <!-- route arrow -->
+    <path
+        android:strokeColor="#B45309"
+        android:strokeWidth="4.2"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:fillColor="#00000000"
+        android:pathData="M50,54 L70,54 M63,48 L70,54 L63,60" />
+</vector>

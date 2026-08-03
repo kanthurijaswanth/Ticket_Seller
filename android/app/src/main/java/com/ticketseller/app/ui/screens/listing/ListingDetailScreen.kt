@@ -330,7 +330,7 @@ private fun BottomBar(l: Listing, isMine: Boolean, onChat: () -> Unit, onBuy: ()
     val g = LocalGlass.current
     Row(
         modifier.fillMaxWidth().navigationBarsPadding().padding(16.dp)
-            .clip(RoundedCornerShape(24.dp)).background(g.glassStrong).padding(12.dp),
+            .clip(RoundedCornerShape(24.dp)).background(g.bg1).background(g.glassStrong).padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
