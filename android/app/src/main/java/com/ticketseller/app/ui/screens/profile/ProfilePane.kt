@@ -1,11 +1,19 @@
 package com.ticketseller.app.ui.screens.profile
 
+import android.app.Activity
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBalanceWallet
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Logout
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.StarRate
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -73,12 +81,13 @@ fun ProfilePane(
     vm: ProfileViewModel = hiltViewModel(),
     onEditProfile: () -> Unit,
     onSignOut: () -> Unit,
+    onOpenTheme: () -> Unit = {},
 ) {
     val me by vm.me.collectAsState()
     val seedState by vm.seedState.collectAsState()
     if (me == null) LoadingBox()
     else Column(
-        Modifier.fillMaxSize().padding(20.dp),
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp).padding(bottom = 96.dp),
         verticalArrangement = Arrangement.spacedBy(14.dp),
     ) {
         // Profile header card
@@ -130,6 +139,40 @@ fun ProfilePane(
                         color = if (me!!.phone.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                     )
                 },
+            )
+        }
+
+        // UPI card — needed to receive payments as a seller
+        Card(modifier = Modifier.fillMaxWidth()) {
+            ListItem(
+                leadingContent = { Icon(Icons.Filled.AccountBalanceWallet, null, tint = MaterialTheme.colorScheme.primary) },
+                headlineContent = { Text("UPI ID (to receive payments)") },
+                supportingContent = {
+                    Text(
+                        me!!.upiId.ifBlank { "Add your UPI ID so buyers can pay you when you sell a ticket" },
+                        color = if (me!!.upiId.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
+                    )
+                },
+                trailingContent = { IconButton(onClick = onEditProfile) { Icon(Icons.Filled.Edit, null) } },
+            )
+        }
+
+        // Colours & theme
+        Card(modifier = Modifier.fillMaxWidth().clickable { onOpenTheme() }) {
+            ListItem(
+                leadingContent = { Icon(Icons.Filled.Palette, null, tint = MaterialTheme.colorScheme.primary) },
+                headlineContent = { Text("Colours & theme") },
+                supportingContent = { Text("Recolor the whole app — 6 themes, light or dark") },
+            )
+        }
+
+        // Rate us on Play Store (in-app review)
+        val ctx = LocalContext.current
+        Card(modifier = Modifier.fillMaxWidth().clickable { (ctx as? Activity)?.let { com.ticketseller.app.util.PlayHelpers.requestReview(it) } }) {
+            ListItem(
+                leadingContent = { Icon(Icons.Filled.StarRate, null, tint = MaterialTheme.colorScheme.primary) },
+                headlineContent = { Text("Rate us on the Play Store") },
+                supportingContent = { Text("Enjoying TicketResell? Leave a quick rating") },
             )
         }
 

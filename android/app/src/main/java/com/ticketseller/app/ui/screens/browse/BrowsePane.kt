@@ -8,10 +8,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Train
 import androidx.compose.material.icons.filled.Verified
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -65,12 +67,21 @@ fun BrowsePane(
                     value = query,
                     onValueChange = { query = it },
                     placeholder = { Text("Search city, route or operator") },
+                    leadingIcon = { Icon(Icons.Outlined.Search, null) },
+                    trailingIcon = {
+                        if (query.isNotEmpty()) {
+                            IconButton(onClick = { query = "" }) { Icon(Icons.Filled.Close, "Clear") }
+                        }
+                    },
                     singleLine = true,
+                    shape = MaterialTheme.shapes.large,
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = MaterialTheme.colorScheme.surface,
                         unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedBorderColor = MaterialTheme.colorScheme.surface,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.surface,
                     ),
                 )
                 Spacer(Modifier.height(8.dp))

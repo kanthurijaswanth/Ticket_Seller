@@ -21,6 +21,7 @@ data class Order(
     val sellerId: String = "",
     val amount: Long = 0L,
     val status: OrderStatus = OrderStatus.INITIATED,
+    val paymentRef: String = "",
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
 )

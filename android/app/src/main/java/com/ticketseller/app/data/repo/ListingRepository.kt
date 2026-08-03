@@ -36,6 +36,13 @@ class ListingRepository @Inject constructor(
         }
     }
 
+    /** Convenience for lifecycle transitions (RESERVED / SOLD / ACTIVE …). */
+    suspend fun setStatus(id: String, status: ListingStatus) {
+        supabase.from(table).update(
+            mapOf("status" to status.name, "updated_at" to System.currentTimeMillis())
+        ) { filter { eq("id", id) } }
+    }
+
     suspend fun get(id: String): Listing? = runCatching {
         supabase.from(table).select { filter { eq("id", id) }; limit(1) }
             .decodeList<Listing>().firstOrNull()

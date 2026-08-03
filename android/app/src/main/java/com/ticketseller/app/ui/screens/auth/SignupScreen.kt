@@ -36,6 +36,12 @@ fun SignupScreen(
             Modifier.padding(pad).padding(24.dp).fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
+            Text(
+                "Join TicketResell to buy and sell last-minute tickets safely.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Spacer(Modifier.height(4.dp))
             OutlinedTextField(
                 value = name, onValueChange = { name = it },
                 label = { Text("Full name") },
@@ -57,11 +63,12 @@ fun SignupScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth(),
             )
+            Spacer(Modifier.height(4.dp))
             Button(
                 onClick = { vm.signUp(email, pass, name, onSignedUp) },
                 enabled = !ui.loading,
-                modifier = Modifier.fillMaxWidth(),
-            ) { Text(if (ui.loading) "Creating…" else "Create account") }
+                modifier = Modifier.fillMaxWidth().height(52.dp),
+            ) { Text(if (ui.loading) "Creating…" else "Create account", style = MaterialTheme.typography.titleMedium) }
 
             ui.error?.let {
                 Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)

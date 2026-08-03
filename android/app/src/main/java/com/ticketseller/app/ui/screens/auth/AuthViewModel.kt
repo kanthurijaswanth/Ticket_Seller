@@ -15,6 +15,7 @@ import javax.inject.Inject
 data class AuthUi(
     val loading: Boolean = false,
     val error: String? = null,
+    val info: String? = null,
 )
 
 @HiltViewModel
@@ -77,6 +78,8 @@ class AuthViewModel @Inject constructor(
                 "An account with this email already exists. Try signing in instead."
             "invalid login credentials" in raw || "invalid_credentials" in raw ->
                 "Wrong email or password."
+            "confirm_email" in raw ->
+                "Account created! Check your inbox for a confirmation link, then sign in."
             "email not confirmed" in raw ->
                 "Please check your inbox and click the confirmation link before signing in."
             "invalid email" in raw || "invalid format" in raw ->
@@ -91,6 +94,19 @@ class AuthViewModel @Inject constructor(
             // Fallback
             raw.isBlank() -> "Something went wrong. Please try again."
             else -> e.message ?: "Something went wrong."
+        }
+    }
+
+    fun sendPasswordReset(email: String) {
+        if (email.isBlank()) {
+            _ui.value = _ui.value.copy(error = "Enter your email above first, then tap Forgot password.")
+            return
+        }
+        viewModelScope.launch {
+            _ui.value = AuthUi(loading = true)
+            runCatching { authRepository.sendPasswordReset(email.trim()) }
+                .onSuccess { _ui.value = AuthUi(info = "If that email has an account, a reset link is on its way.") }
+                .onFailure { _ui.value = AuthUi(error = friendlyError(it)) }
         }
     }
 

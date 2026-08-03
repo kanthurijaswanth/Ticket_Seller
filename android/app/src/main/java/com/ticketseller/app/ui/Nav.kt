@@ -15,8 +15,9 @@ import com.ticketseller.app.ui.screens.auth.SignupScreen
 import com.ticketseller.app.ui.screens.chat.ChatScreen
 import com.ticketseller.app.ui.screens.listing.ListingDetailScreen
 import com.ticketseller.app.ui.screens.main.MainShell
+import com.ticketseller.app.ui.screens.notifications.NotificationsScreen
 import com.ticketseller.app.ui.screens.orders.OrderDetailScreen
-import com.ticketseller.app.ui.screens.orders.PaymentComingSoonScreen
+import com.ticketseller.app.ui.screens.orders.PaymentScreen
 import com.ticketseller.app.ui.screens.profile.EditProfileScreen
 import com.ticketseller.app.ui.screens.sell.SellScreen
 
@@ -30,6 +31,7 @@ object Routes {
     const val OrderDetail = "order/{id}"
     const val Payment = "payment/{orderId}"
     const val EditProfile = "profile/edit"
+    const val Notifications = "notifications"
 
     fun listing(id: String) = "listing/$id"
     fun chat(threadId: String) = "chat/$threadId"
@@ -65,6 +67,7 @@ fun AppNav() {
                 onChat = { tid -> nav.navigate(Routes.chat(tid)) },
                 onOrder = { id -> nav.navigate(Routes.order(id)) },
                 onEditProfile = { nav.navigate(Routes.EditProfile) },
+                onNotifications = { nav.navigate(Routes.Notifications) },
                 onSignOut = {
                     authVm.signOut()
                     nav.navigate(Routes.Login) { popUpTo(0) }
@@ -109,10 +112,16 @@ fun AppNav() {
             arguments = listOf(navArgument("orderId") { type = NavType.StringType }),
         ) { entry ->
             val id = entry.arguments?.getString("orderId").orEmpty()
-            PaymentComingSoonScreen(orderId = id, onBack = { nav.popBackStack() })
+            PaymentScreen(orderId = id, onBack = { nav.popBackStack() })
         }
         composable(Routes.EditProfile) {
             EditProfileScreen(onDone = { nav.popBackStack() })
+        }
+        composable(Routes.Notifications) {
+            NotificationsScreen(
+                onBack = { nav.popBackStack() },
+                onOpenOrder = { id -> nav.navigate(Routes.order(id)) },
+            )
         }
     }
 }

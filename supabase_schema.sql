@@ -23,11 +23,14 @@ create table if not exists public.users (
     email         text not null default '',
     name          text not null default '',
     phone         text not null default '',
+    upi_id        text not null default '',
     photo_url     text not null default '',
     rating_avg    double precision not null default 0,
     rating_count  integer not null default 0,
     created_at    bigint not null default (extract(epoch from now()) * 1000)::bigint
 );
+-- Migration for existing projects: add the UPI column if the table predates it.
+alter table public.users add column if not exists upi_id text not null default '';
 
 -- ─── listings ─────────────────────────────────────────────────────────────
 create table if not exists public.listings (
@@ -92,11 +95,28 @@ create table if not exists public.orders (
     seller_id   text not null,
     amount      bigint not null default 0,
     status      text not null default 'INITIATED',
+    payment_ref text not null default '',
     created_at  bigint not null default (extract(epoch from now()) * 1000)::bigint,
     updated_at  bigint not null default (extract(epoch from now()) * 1000)::bigint
 );
 create index if not exists idx_orders_buyer  on public.orders (buyer_id);
 create index if not exists idx_orders_seller on public.orders (seller_id);
+-- Migration for existing projects: add the payment reference column.
+alter table public.orders add column if not exists payment_ref text not null default '';
+
+-- ─── ratings ──────────────────────────────────────────────────────────────
+-- One row per rating left after a completed order. rater_id rates ratee_id.
+create table if not exists public.ratings (
+    id          text primary key,
+    order_id    text not null,
+    rater_id    text not null,
+    ratee_id    text not null,
+    stars       integer not null default 5,
+    comment     text not null default '',
+    created_at  bigint not null default (extract(epoch from now()) * 1000)::bigint
+);
+create index if not exists idx_ratings_ratee on public.ratings (ratee_id);
+create index if not exists idx_ratings_order on public.ratings (order_id);
 
 -- ─── Row Level Security (open for dev — TIGHTEN BEFORE PRODUCTION) ────────
 -- During development we let the "anon" key read/write everything so the
@@ -107,6 +127,7 @@ alter table public.listings       disable row level security;
 alter table public.chat_threads   disable row level security;
 alter table public.chat_messages  disable row level security;
 alter table public.orders         disable row level security;
+alter table public.ratings        disable row level security;
 
 -- ─── Enable realtime for live updates ─────────────────────────────────────
 -- Make sure these tables are in the supabase_realtime publication so the

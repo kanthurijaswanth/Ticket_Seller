@@ -108,7 +108,7 @@ class SellViewModel @Inject constructor(
 
         viewModelScope.launch {
             _ui.value = _ui.value.copy(submitting = true, error = null)
-            // Wrap the entire pipeline so any failure (verifier, user fetch, Firestore write)
+            // Wrap the entire pipeline so any failure (verifier, user fetch, database write)
             // surfaces as a friendly error instead of dropping the user back to Browse.
             runCatching {
                 val result = verifier.verify(u.ocrText, u.imageHash, u.ticket)
@@ -142,11 +142,11 @@ class SellViewModel @Inject constructor(
                 .onFailure { e ->
                     val msg = e.message.orEmpty()
                     val friendly = when {
-                        "PERMISSION_DENIED" in msg ->
-                            "Couldn't save listing. Open Firebase Console → Firestore Database → Create database (test mode)."
-                        "Cloud Firestore API has not been used" in msg ->
-                            "Firestore isn't enabled for this project yet. Enable it at " +
-                                "console.firebase.google.com → your project → Firestore Database → Create database."
+                        "PERMISSION_DENIED" in msg || "row-level security" in msg.lowercase() ->
+                            "Couldn't save listing — the database rejected the write. Check the Supabase table's " +
+                                "row-level security settings."
+                        "relation" in msg.lowercase() && "does not exist" in msg.lowercase() ->
+                            "The database tables aren't set up yet. Run supabase_schema.sql in the Supabase SQL editor."
                         msg.isBlank() -> "Submission failed. Please check your connection."
                         else -> "Submission failed: $msg"
                     }

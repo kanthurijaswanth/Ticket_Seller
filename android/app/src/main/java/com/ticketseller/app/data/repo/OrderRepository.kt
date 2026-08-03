@@ -53,6 +53,25 @@ class OrderRepository @Inject constructor(
         ) { filter { eq("id", id) } }
     }
 
+    /** Mark an order paid and stash the UPI reference / note the buyer confirmed. */
+    suspend fun markPaid(id: String, paymentRef: String) {
+        supabase.from(table).update(
+            mapOf(
+                "status" to OrderStatus.PAID_OFFLINE.name,
+                "payment_ref" to paymentRef,
+                "updated_at" to System.currentTimeMillis(),
+            )
+        ) { filter { eq("id", id) } }
+    }
+
+    /** Is there already a live (non-cancelled) order for this listing? Prevents double-buying. */
+    suspend fun activeOrderForListing(listingId: String): Order? = runCatching {
+        supabase.from(table).select { filter { eq("listing_id", listingId) } }
+            .decodeList<Order>()
+            .filter { it.status != OrderStatus.CANCELLED }
+            .maxByOrNull { it.updatedAt }
+    }.getOrNull()
+
     private suspend fun fetchMine(uid: String, asBuyer: Boolean): List<Order> = runCatching {
         val field = if (asBuyer) "buyer_id" else "seller_id"
         supabase.from(table).select {

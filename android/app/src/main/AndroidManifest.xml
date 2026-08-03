@@ -12,6 +12,14 @@
 
   <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+  <!-- Needed on Android 11+ so we can launch UPI apps (GPay / PhonePe / Paytm …) for payment. -->
+  <queries>
+    <intent>
+      <action android:name="android.intent.action.VIEW" />
+      <data android:scheme="upi" />
+    </intent>
+  </queries>
+
   <application
       android:name=".TicketSellerApp"
       android:label="@string/app_name"

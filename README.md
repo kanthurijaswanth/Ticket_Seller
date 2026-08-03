@@ -380,15 +380,37 @@ Two Gradle processes overlapped. Close Android Studio entirely, run `./gradlew -
 
 ## Roadmap / things not built yet
 
-- ☐ **Razorpay / Cashfree** integration for in-app payment (currently a placeholder screen)
-- ☐ **Ratings UI** — data model exists, no rating-after-order screen
-- ☐ **Push notifications** — would use Firebase Cloud Messaging or OneSignal (separate from backend)
-- ☐ **Photo cropping** before upload — currently uploads as-is
-- ☐ **Admin / review queue UI** — pending listings sit in Postgres; no admin screen
-- ☐ **Real AdMob** — currently using Google's test App ID
-- ☐ **Release-signed APK / AAB** for Play Store — needs a keystore generated
-- ☐ **Privacy policy page** for Play Store listing
-- ☐ **Google Sign-In** — removed during Supabase migration; re-add via Supabase OAuth
+- ☑ **UPI payment** — buyers pay the seller's UPI ID directly via their UPI app (GPay/PhonePe/Paytm). See [UPI payment flow](#upi-payment-flow) below.
+- ☑ **Ratings UI** — buyers and sellers rate each other after a completed order; the average shows on profiles.
+- ☑ **Order lifecycle** — Buy → reserve → pay → seller confirms → completed → rate; sellers see incoming orders in the **Sold** tab.
+- ☑ **Real verified badges** — listings show "Verified" or "Pending review" based on actual status.
+- ☑ **Forgot password** + friendly email-confirmation handling.
+- ☑ **"How it works"** in-app onboarding dialog (top-bar help icon).
+- ☐ **Razorpay / Cashfree escrow** — optional upgrade if you want the platform to hold funds / take commission (UPI-direct has no escrow).
+- ☐ **Push notifications** — would use Firebase Cloud Messaging or OneSignal (separate from backend).
+- ☐ **Photo cropping** before upload — currently uploads as-is.
+- ☐ **Admin / review queue UI** — pending listings sit in Postgres; no admin screen.
+- ☐ **Real AdMob** — currently using Google's test App ID.
+- ☐ **Release-signed APK / AAB** for Play Store — needs a keystore generated.
+- ☐ **Privacy policy page** for Play Store listing.
+- ☐ **Google Sign-In** — removed during Supabase migration; re-add via Supabase OAuth.
+
+---
+
+## UPI payment flow
+
+Payments go **directly from the buyer to the seller** over UPI — the app never holds money (no gateway account or fees needed).
+
+1. A seller adds their **UPI ID** in **Profile → Edit profile** (e.g. `yourname@okhdfcbank`).
+2. A buyer taps **Buy** on a listing → an order is created and the ticket is **reserved**.
+3. On the payment screen the buyer taps **Pay ₹X via UPI** → their UPI app opens pre-filled with the seller's UPI ID and amount.
+4. After paying, the buyer confirms → the order is marked **paid** and the listing becomes **Sold**.
+5. The seller sees the sale under **My Tickets → Sold**, shares the ticket, and taps **Mark as completed**.
+6. Both sides can then **rate** each other.
+
+> Because payment is peer-to-peer UPI, there's no escrow. If you later want the platform to hold funds or take a commission, integrate Razorpay/Cashfree and route payments through a Supabase Edge Function (kept as a future item above).
+
+If a seller hasn't added a UPI ID, the buyer is prompted to ask for it in chat and can confirm a manual payment.
 
 ---
 

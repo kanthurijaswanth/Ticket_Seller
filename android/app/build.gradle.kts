@@ -35,7 +35,6 @@ android {
     targetCompatibility = JavaVersion.VERSION_17
   }
   kotlinOptions { jvmTarget = "17" }
-  kotlin { jvmToolchain(17) }
 
   packaging {
     resources { excludes += "/META-INF/*" }
@@ -98,6 +97,13 @@ dependencies {
   // AdMob + UMP (independent of backend)
   implementation("com.google.android.gms:play-services-ads:23.0.0")
   implementation("com.google.android.ump:user-messaging-platform:2.2.0")
+
+  // Backdrop blur for the glass UI (real blur on Android 12+, graceful fallback below)
+  implementation("dev.chrisbanes.haze:haze:0.7.3")
+
+  // Play In-App Update (upgrade prompt) + In-App Review (rate on Play Store)
+  implementation("com.google.android.play:app-update-ktx:2.1.0")
+  implementation("com.google.android.play:review-ktx:2.0.1")
 
   // Debug tools
   debugImplementation("androidx.compose.ui:ui-tooling:$composeVersion")

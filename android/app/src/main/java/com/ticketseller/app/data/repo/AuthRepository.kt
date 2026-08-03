@@ -47,10 +47,17 @@ class AuthRepository @Inject constructor(
             this.email = email
             this.password = password
         }
+        // If the Supabase project requires email confirmation, no session is created
+        // until the user clicks the link — that's a success state, not a failure.
         val uid = supabase.auth.currentUserOrNull()?.id
-            ?: throw IllegalStateException("Sign-up succeeded but no session returned.")
+            ?: throw IllegalStateException("CONFIRM_EMAIL")
         ensureUserDoc(uid, email, name, "")
         return uid
+    }
+
+    /** Send a password-reset email. */
+    suspend fun sendPasswordReset(email: String) {
+        supabase.auth.resetPasswordForEmail(email)
     }
 
     suspend fun signInEmail(email: String, password: String): String {
