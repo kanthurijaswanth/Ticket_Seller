@@ -45,26 +45,13 @@ fun AppBackground(
     val g = LocalGlass.current
     val hazeState = remember { HazeState() }
     Box(modifier.fillMaxSize()) {
-        // Background layer (Haze source): gradient + colour blobs.
+        // Clean, even background — a single flat theme colour (no colour patches).
         Box(
             Modifier
                 .matchParentSize()
                 .haze(hazeState, style = HazeDefaults.style(backgroundColor = g.bg1, tint = g.glass, blurRadius = 24.dp))
-                .background(Brush.verticalGradient(listOf(g.bg1, g.bg2))),
-        ) {
-            Box(
-                Modifier.size(340.dp).offset((-110).dp, (-100).dp)
-                    .background(Brush.radialGradient(listOf(g.blobA, Color.Transparent), radius = 480f), CircleShape),
-            )
-            Box(
-                Modifier.size(320.dp).align(Alignment.TopEnd).offset(120.dp, 160.dp)
-                    .background(Brush.radialGradient(listOf(g.blobB, Color.Transparent), radius = 460f), CircleShape),
-            )
-            Box(
-                Modifier.size(300.dp).align(Alignment.BottomStart).offset((-70).dp, 120.dp)
-                    .background(Brush.radialGradient(listOf(g.blobA, Color.Transparent), radius = 440f), CircleShape),
-            )
-        }
+                .background(g.bg1),
+        )
         // Foreground content (drawn over the Haze source).
         CompositionLocalProvider(LocalHazeState provides hazeState) {
             Box(Modifier.matchParentSize(), content = content)

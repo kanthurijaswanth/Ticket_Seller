@@ -13,6 +13,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,8 +27,20 @@ class OrderRepository @Inject constructor(
 
     suspend fun create(order: Order): String {
         val id = order.id.ifBlank { UUID.randomUUID().toString() }
-        val withId = order.copy(id = id)
-        supabase.from(table).insert(withId)
+        // Insert explicit columns only — omit payment_ref so an order can be created even
+        // before that column is migrated into the DB.
+        supabase.from(table).insert(
+            buildJsonObject {
+                put("id", id)
+                put("listing_id", order.listingId)
+                put("buyer_id", order.buyerId)
+                put("seller_id", order.sellerId)
+                put("amount", order.amount)
+                put("status", order.status.name)
+                put("created_at", order.createdAt)
+                put("updated_at", order.updatedAt)
+            },
+        )
         return id
     }
 
@@ -53,15 +67,23 @@ class OrderRepository @Inject constructor(
         ) { filter { eq("id", id) } }
     }
 
-    /** Mark an order paid and stash the UPI reference / note the buyer confirmed. */
+    /** Mark an order paid and stash the UPI reference. Falls back to status-only if the
+     *  payment_ref column hasn't been migrated in yet. */
     suspend fun markPaid(id: String, paymentRef: String) {
-        supabase.from(table).update(
-            mapOf(
-                "status" to OrderStatus.PAID_OFFLINE.name,
-                "payment_ref" to paymentRef,
-                "updated_at" to System.currentTimeMillis(),
-            )
-        ) { filter { eq("id", id) } }
+        val now = System.currentTimeMillis()
+        runCatching {
+            supabase.from(table).update(
+                mapOf(
+                    "status" to OrderStatus.PAID_OFFLINE.name,
+                    "payment_ref" to paymentRef,
+                    "updated_at" to now,
+                )
+            ) { filter { eq("id", id) } }
+        }.onFailure {
+            supabase.from(table).update(
+                mapOf("status" to OrderStatus.PAID_OFFLINE.name, "updated_at" to now)
+            ) { filter { eq("id", id) } }
+        }
     }
 
     /** Is there already a live (non-cancelled) order for this listing? Prevents double-buying. */

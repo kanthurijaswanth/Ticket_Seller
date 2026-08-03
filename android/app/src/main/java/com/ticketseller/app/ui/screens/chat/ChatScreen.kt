@@ -63,20 +63,22 @@ class ChatViewModel @Inject constructor(
 
     fun send(text: String) {
         if (text.isBlank()) return
-        viewModelScope.launch { chatRepository.send(threadId, uid, text) }
+        viewModelScope.launch { runCatching { chatRepository.send(threadId, uid, text) } }
     }
 
     fun consentReveal() {
         val t = thread.value ?: return
         val asBuyer = uid == t.buyerId
         viewModelScope.launch {
-            val me = userRepository.get(uid) ?: return@launch
-            chatRepository.consentReveal(threadId, asBuyer, me.phone)
-            chatRepository.send(
-                threadId, uid,
-                if (asBuyer) "Buyer agreed to share phone number" else "Seller agreed to share phone number",
-                type = ChatMessageType.SYSTEM,
-            )
+            runCatching {
+                val me = userRepository.get(uid) ?: return@runCatching
+                chatRepository.consentReveal(threadId, asBuyer, me.phone)
+                chatRepository.send(
+                    threadId, uid,
+                    if (asBuyer) "Buyer agreed to share phone number" else "Seller agreed to share phone number",
+                    type = ChatMessageType.SYSTEM,
+                )
+            }
         }
     }
 }
@@ -129,9 +131,11 @@ fun ChatScreen(
                 }
             }
 
-            // Input bar
+            // Input bar — rises above the keyboard (IME) and clears the nav bar.
             Row(
-                Modifier.fillMaxWidth().navigationBarsPadding().padding(12.dp),
+                Modifier.fillMaxWidth()
+                    .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
+                    .padding(12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
             ) {

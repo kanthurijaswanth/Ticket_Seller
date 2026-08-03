@@ -12,6 +12,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -72,24 +74,38 @@ class AuthRepository @Inject constructor(
     }
 
     /**
-     * DEV ONLY. Skips Supabase auth entirely. Generates a stable UUID, stores it in
-     * SharedPreferences, and best-effort writes a /users row.
+     * DEV ONLY. Skips Supabase auth and signs in as a ready-made demo account with a
+     * filled-out profile, so the app looks populated for testing/demos.
      */
     suspend fun devBypassSignIn(): String {
-        val existing = devUidFlow.value
-        if (!existing.isNullOrBlank()) return existing
-        val uid = "dev_" + UUID.randomUUID().toString().replace("-", "").take(20)
+        val uid = DEMO_UID
         prefs.edit().putString(KEY_DEV_UID, uid).apply()
         devUidFlow.value = uid
-        runCatching {
-            ensureUserDoc(
-                uid = uid,
-                email = "$uid@dev.local",
-                name = "Dev User ${uid.takeLast(4)}",
-                photoUrl = "",
-            )
-        }
+        runCatching { ensureDemoUser(uid) }
         return uid
+    }
+
+    private suspend fun ensureDemoUser(uid: String) {
+        val existing = runCatching {
+            supabase.from("users").select(Columns.list("uid")) {
+                filter { eq("uid", uid) }; limit(1)
+            }.decodeList<UidOnly>()
+        }.getOrDefault(emptyList())
+        if (existing.isEmpty()) {
+            runCatching {
+                supabase.from("users").insert(
+                    buildJsonObject {
+                        put("uid", uid)
+                        put("email", "demo@ticketresell.app")
+                        put("name", "Aditya Sharma")
+                        put("phone", "9876543210")
+                        put("photo_url", "")
+                        put("rating_avg", 4.8)
+                        put("rating_count", 23)
+                    },
+                )
+            }
+        }
     }
 
     suspend fun signOut() {
@@ -107,13 +123,21 @@ class AuthRepository @Inject constructor(
         }.getOrDefault(emptyList())
 
         if (existing.isEmpty()) {
-            val user = User(
-                uid = uid,
-                email = email,
-                name = name.ifBlank { email.substringBefore('@') },
-                photoUrl = photoUrl,
-            )
-            runCatching { supabase.from("users").insert(user) }
+            // Explicit columns (omit upi_id) so the row is created even before that column
+            // is migrated in.
+            runCatching {
+                supabase.from("users").insert(
+                    buildJsonObject {
+                        put("uid", uid)
+                        put("email", email)
+                        put("name", name.ifBlank { email.substringBefore('@') })
+                        put("phone", "")
+                        put("photo_url", photoUrl)
+                        put("rating_avg", 0.0)
+                        put("rating_count", 0)
+                    },
+                )
+            }
         }
     }
 
@@ -122,5 +146,6 @@ class AuthRepository @Inject constructor(
 
     companion object {
         private const val KEY_DEV_UID = "dev_bypass_uid"
+        private const val DEMO_UID = "demo_user_01"
     }
 }

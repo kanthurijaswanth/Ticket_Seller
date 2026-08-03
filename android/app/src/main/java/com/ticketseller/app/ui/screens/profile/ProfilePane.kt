@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -46,8 +47,10 @@ class ProfileViewModel @Inject constructor(
     private val demoSeed: DemoSeed,
 ) : ViewModel() {
     private val uid = MutableStateFlow(authRepository.effectiveUid().orEmpty())
-    val me: StateFlow<User?> = uid.flatMapLatest {
-        if (it.isBlank()) flowOf(null) else userRepository.observe(it)
+    val me: StateFlow<User?> = uid.flatMapLatest { id ->
+        // Fall back to a minimal user so the screen never hangs on the spinner if the
+        // row is missing or a fetch fails.
+        if (id.isBlank()) flowOf(User()) else userRepository.observe(id).map { it ?: User(uid = id) }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     private val _seedState = MutableStateFlow<SeedState>(SeedState.Idle)

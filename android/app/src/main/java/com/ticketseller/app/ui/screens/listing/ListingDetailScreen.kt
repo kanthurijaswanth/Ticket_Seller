@@ -90,17 +90,22 @@ class ListingDetailViewModel @Inject constructor(
         val uid = authRepository.effectiveUid() ?: return
         if (uid == l.sellerId) return
         viewModelScope.launch {
-            val me = userRepository.get(uid)
-            val seller = userRepository.get(l.sellerId)
-            val thread = chatRepository.openThread(
-                ChatThread(
-                    listingId = l.id,
-                    listingTitle = "${l.ticket.source} → ${l.ticket.destination}",
-                    buyerId = uid, sellerId = l.sellerId,
-                    buyerName = me?.name.orEmpty(), sellerName = seller?.name.orEmpty(),
-                ),
-            )
-            _action.value = DetailAction.OpenChat(thread.id)
+            runCatching {
+                val me = userRepository.get(uid)
+                val seller = userRepository.get(l.sellerId)
+                chatRepository.openThread(
+                    ChatThread(
+                        listingId = l.id,
+                        listingTitle = "${l.ticket.source} → ${l.ticket.destination}",
+                        buyerId = uid, sellerId = l.sellerId,
+                        buyerName = me?.name.orEmpty(), sellerName = seller?.name.orEmpty(),
+                    ),
+                )
+            }.onSuccess { thread ->
+                _action.value = DetailAction.OpenChat(thread.id)
+            }.onFailure {
+                _message.value = "Couldn't open chat. Please check your connection and try again."
+            }
         }
     }
 
@@ -116,11 +121,17 @@ class ListingDetailViewModel @Inject constructor(
                 else _message.value = "Someone else is currently buying this ticket."
                 return@launch
             }
-            val orderId = orderRepository.create(
-                Order(listingId = l.id, buyerId = uid, sellerId = l.sellerId, amount = l.askingPrice, status = OrderStatus.AWAITING_PAYMENT),
-            )
-            listingRepository.setStatus(l.id, ListingStatus.RESERVED)
-            _action.value = DetailAction.OpenPayment(orderId)
+            runCatching {
+                val orderId = orderRepository.create(
+                    Order(listingId = l.id, buyerId = uid, sellerId = l.sellerId, amount = l.askingPrice, status = OrderStatus.AWAITING_PAYMENT),
+                )
+                runCatching { listingRepository.setStatus(l.id, ListingStatus.RESERVED) } // non-fatal
+                orderId
+            }.onSuccess { orderId ->
+                _action.value = DetailAction.OpenPayment(orderId)
+            }.onFailure {
+                _message.value = "Couldn't start the order. Please check your connection and try again."
+            }
         }
     }
 

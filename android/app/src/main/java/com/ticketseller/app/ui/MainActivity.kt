@@ -1,11 +1,14 @@
 package com.ticketseller.app.ui
 
+import android.app.Activity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
@@ -21,27 +24,32 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    // Launcher for the Play in-app update flow (no-op result handling — Play drives the UI).
     private val updateLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, true)
+        // Edge-to-edge so Compose gets IME (keyboard) + system-bar insets on Android 15+.
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         maybeCheckForUpdate()
         setContent {
             val themeVm: ThemeViewModel = hiltViewModel()
             val c = themeVm.controller
             val dark = c.darkOverride ?: isSystemInDarkTheme()
+
+            // Keep status/nav bar icons readable against the current theme background.
+            val view = LocalView.current
+            LaunchedEffect(dark) {
+                val controller = WindowCompat.getInsetsController(window, view)
+                controller.isAppearanceLightStatusBars = !dark
+                controller.isAppearanceLightNavigationBars = !dark
+            }
+
             AppTheme(themeKey = c.themeKey, dark = dark) {
                 AppNav()
             }
         }
     }
 
-    /**
-     * Play In-App Update. When the app is installed from Play and a newer version exists,
-     * this shows Google's flexible-update prompt. On a sideloaded/debug build it's a no-op.
-     */
     private fun maybeCheckForUpdate() {
         val manager = AppUpdateManagerFactory.create(this)
         manager.appUpdateInfo.addOnSuccessListener { info ->
