@@ -41,6 +41,7 @@ import com.ticketseller.app.ui.common.LoadingBox
 import com.ticketseller.app.ui.common.glassBox
 import com.ticketseller.app.ui.theme.LocalGlass
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
@@ -62,6 +63,14 @@ class ChatViewModel @Inject constructor(
     val messages: StateFlow<List<ChatMessage>?> =
         chatRepository.observeMessages(threadId).stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
+    // Optimistic: flips true the moment you tap, so the UI updates instantly even before realtime.
+    private val _consentGiven = MutableStateFlow(false)
+    val consentGiven: StateFlow<Boolean> = _consentGiven
+
+    private val _toast = MutableStateFlow<String?>(null)
+    val toast: StateFlow<String?> = _toast
+    fun clearToast() { _toast.value = null }
+
     fun send(text: String) {
         if (text.isBlank()) return
         viewModelScope.launch { runCatching { chatRepository.send(threadId, uid, text) } }
@@ -70,10 +79,12 @@ class ChatViewModel @Inject constructor(
     fun consentReveal() {
         val t = thread.value ?: return
         val asBuyer = uid == t.buyerId
+        _consentGiven.value = true
         viewModelScope.launch {
+            val phone = runCatching { userRepository.get(uid)?.phone }.getOrNull().orEmpty()
+            if (phone.isBlank()) _toast.value = "Add your phone number in Profile so it can be shared."
             runCatching {
-                val me = userRepository.get(uid) ?: return@runCatching
-                chatRepository.consentReveal(threadId, asBuyer, me.phone)
+                chatRepository.consentReveal(threadId, asBuyer, phone)
                 chatRepository.send(
                     threadId, uid,
                     if (asBuyer) "Buyer agreed to share phone number" else "Seller agreed to share phone number",
@@ -93,12 +104,18 @@ fun ChatScreen(
     val g = LocalGlass.current
     val thread by vm.thread.collectAsState()
     val messages by vm.messages.collectAsState()
+    val consentGiven by vm.consentGiven.collectAsState()
+    val toast by vm.toast.collectAsState()
+    val ctx = androidx.compose.ui.platform.LocalContext.current
     var draft by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
     LaunchedEffect(messages?.size) {
         val n = messages?.size ?: 0
         if (n > 0) listState.animateScrollToItem(n - 1)
+    }
+    LaunchedEffect(toast) {
+        toast?.let { android.widget.Toast.makeText(ctx, it, android.widget.Toast.LENGTH_LONG).show(); vm.clearToast() }
     }
 
     AppBackground {
@@ -116,7 +133,7 @@ fun ChatScreen(
                 }
             }
 
-            thread?.let { ContactCard(it, vm.uid, onConsent = vm::consentReveal) }
+            thread?.let { ContactCard(it, vm.uid, myConsent = consentGiven, onConsent = vm::consentReveal) }
 
             val ms = messages
             if (ms == null) {
@@ -163,10 +180,10 @@ fun ChatScreen(
 }
 
 @Composable
-private fun ContactCard(thread: ChatThread, uid: String, onConsent: () -> Unit) {
+private fun ContactCard(thread: ChatThread, uid: String, myConsent: Boolean, onConsent: () -> Unit) {
     val g = LocalGlass.current
     val asBuyer = uid == thread.buyerId
-    val mine = if (asBuyer) thread.buyerConsentReveal else thread.sellerConsentReveal
+    val mine = (if (asBuyer) thread.buyerConsentReveal else thread.sellerConsentReveal) || myConsent
     val theirs = if (asBuyer) thread.sellerConsentReveal else thread.buyerConsentReveal
     val bothAgreed = thread.buyerConsentReveal && thread.sellerConsentReveal
 

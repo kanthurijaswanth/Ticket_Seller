@@ -77,6 +77,9 @@ class PaymentViewModel @Inject constructor(
     val listing: StateFlow<Listing?> = _listing
     private val _busy = MutableStateFlow(false)
     val busy: StateFlow<Boolean> = _busy
+    // Optimistic: shows the success state immediately after confirming, even before realtime.
+    private val _justPaid = MutableStateFlow(false)
+    val justPaid: StateFlow<Boolean> = _justPaid
 
     init {
         viewModelScope.launch {
@@ -92,7 +95,7 @@ class PaymentViewModel @Inject constructor(
             runCatching {
                 orderRepository.markPaid(orderId, paymentRef)
                 _listing.value?.let { listingRepository.setStatus(it.id, ListingStatus.SOLD) }
-            }
+            }.onSuccess { _justPaid.value = true }
             _busy.value = false
         }
     }
@@ -121,6 +124,7 @@ fun PaymentScreen(
     val seller by vm.seller.collectAsState()
     val listing by vm.listing.collectAsState()
     val busy by vm.busy.collectAsState()
+    val justPaid by vm.justPaid.collectAsState()
     val ctx = LocalContext.current
 
     var showConfirm by remember { mutableStateOf(false) }
@@ -146,7 +150,7 @@ fun PaymentScreen(
             Spacer(Modifier.height(18.dp))
 
             if (o == null) { LoadingBox(); return@Column }
-            val paid = o.status == OrderStatus.PAID_OFFLINE || o.status == OrderStatus.COMPLETED
+            val paid = justPaid || o.status == OrderStatus.PAID_OFFLINE || o.status == OrderStatus.COMPLETED
             val cancelled = o.status == OrderStatus.CANCELLED
 
             when {
